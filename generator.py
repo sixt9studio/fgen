@@ -1,65 +1,48 @@
 import os
-import subprocess
 from colorama import Fore
 import time
 from modelprocess import upload_dataset
 
-# Try tkinter (for Windows/Linux)
-try:
-    from tkinter import Tk, filedialog
-    tkinter_available = True
-except:
-    tkinter_available = False
-
 server_url = "https://api.moosaksecurity.space/moosak/upload_dataset.php"
 
 
-# ---------------- FILE PICKER ----------------
+# ---------------- FILE EXTENSIONS ----------------
+
+IMAGE_EXT = (".png", ".jpg", ".jpeg", ".heic", ".heif")
+VIDEO_EXT = (".mp4", ".mov", ".avi", ".mkv")
+
+
+# ---------------- FILE PATH INPUT ----------------
 
 def pick_file(file_type):
 
-    # If running in Termux
-    if "com.termux" in os.environ.get("PREFIX", ""):
+    while True:
 
-        while True:
+        print()
 
-            try:
-                path = subprocess.check_output(
-                    ["termux-file-picker", "-m", file_type],
-                    text=True
-                ).strip()
+        if file_type == "image":
+            path = input(Fore.GREEN + "Enter image file path: ").strip()
 
-                if path and os.path.exists(path):
-                    return path
+        elif file_type == "video":
+            path = input(Fore.GREEN + "Enter video file path: ").strip()
 
-                print(Fore.RED + "No file selected. Please try again.")
+        else:
+            path = input(Fore.GREEN + "Enter file path: ").strip()
 
-            except:
-                print(Fore.RED + "File picker closed. Try again.")
+        if not os.path.exists(path):
+            print(Fore.RED + "File not found. Please enter a valid path.")
+            continue
 
-    # Desktop (tkinter)
-    elif tkinter_available:
+        # Validate extension
+        if file_type == "image" and not path.lower().endswith(IMAGE_EXT):
+            print(Fore.RED + "Invalid file type. Only image files allowed.")
+            continue
 
-        root = Tk()
-        root.withdraw()
+        if file_type == "video" and not path.lower().endswith(VIDEO_EXT):
+            print(Fore.RED + "Invalid file type. Only video files allowed.")
+            continue
 
-        if file_type == "image/*":
-            path = filedialog.askopenfilename(
-                filetypes=[
-                    ("Image Files", "*.png *.jpg *.jpeg *.heic *.heif")
-                ]
-            )
-            return path
-
-        elif file_type == "video/*":
-            path = filedialog.askopenfilename(
-                filetypes=[
-                    ("Video Files", "*.mp4 *.mov *.avi *.mkv")
-                ]
-            )
-            return path
-
-    return None
+        return path
 
 
 # ---------------- MAIN FUNCTION ----------------
@@ -84,13 +67,8 @@ def start_generation(model, encryption, validity):
 
             print()
             print(Fore.YELLOW + message)
-            input(Fore.GREEN + "Press ENTER to open image picker...")
 
-            file = pick_file("image/*")
-
-            if not file:
-                print(Fore.RED + "Selection cancelled.")
-                return
+            file = pick_file("image")
 
             selected_files.append((label, file))
 
@@ -108,13 +86,8 @@ def start_generation(model, encryption, validity):
 
             print()
             print(Fore.YELLOW + message)
-            input(Fore.GREEN + "Press ENTER to open image picker...")
 
-            file = pick_file("image/*")
-
-            if not file:
-                print(Fore.RED + "Selection cancelled.")
-                return
+            file = pick_file("image")
 
             selected_files.append((label, file))
 
@@ -124,13 +97,8 @@ def start_generation(model, encryption, validity):
 
         print()
         print(Fore.YELLOW + "Now select VIDEO file")
-        input(Fore.GREEN + "Press ENTER to open video picker...")
 
-        file = pick_file("video/*")
-
-        if not file:
-            print(Fore.RED + "No video selected.")
-            return
+        file = pick_file("video")
 
         selected_files.append(("Video", file))
 
