@@ -1,17 +1,66 @@
-from tkinter import Tk, filedialog
+import os
+import subprocess
 from colorama import Fore
 import time
 from modelprocess import upload_dataset
 
+# Try tkinter (for Windows/Linux)
+try:
+    from tkinter import Tk, filedialog
+    tkinter_available = True
+except:
+    tkinter_available = False
+
 server_url = "https://api.moosaksecurity.space/moosak/upload_dataset.php"
+
+
+# ---------------- FILE PICKER ----------------
+
+def pick_file(file_type):
+
+    # If running in Termux
+    if "com.termux" in os.environ.get("PREFIX", ""):
+
+        try:
+            path = subprocess.check_output(
+                ["termux-file-picker", "-m", file_type],
+                text=True
+            ).strip()
+
+            return path
+
+        except:
+            return None
+
+    # Desktop (tkinter)
+    elif tkinter_available:
+
+        root = Tk()
+        root.withdraw()
+
+        if file_type == "image/*":
+            return filedialog.askopenfilename(
+                filetypes=[
+                    ("Image Files", "*.png *.jpg *.jpeg *.heic *.heif")
+                ]
+            )
+
+        elif file_type == "video/*":
+            return filedialog.askopenfilename(
+                filetypes=[
+                    ("Video Files", "*.mp4 *.mov *.avi *.mkv")
+                ]
+            )
+
+    return None
+
+
+# ---------------- MAIN FUNCTION ----------------
 
 def start_generation(model, encryption, validity):
 
     print()
     print(Fore.GREEN + "[FGEN] Preparing generation pipeline")
-
-    root = Tk()
-    root.withdraw()
 
     selected_files = []
 
@@ -30,15 +79,7 @@ def start_generation(model, encryption, validity):
             print(Fore.YELLOW + message)
             input(Fore.GREEN + "Press ENTER to open image picker...")
 
-            file = filedialog.askopenfilename(
-                title=f"Select {label} Image",
-                filetypes=[
-                    ("Image Files", "*.png *.jpg *.jpeg *.heic *.heif"),
-                    ("PNG Files", "*.png"),
-                    ("JPEG Files", "*.jpg *.jpeg"),
-                    ("HEIC Files", "*.heic *.heif")
-                ]
-            )
+            file = pick_file("image/*")
 
             if not file:
                 print(Fore.RED + "Selection cancelled.")
@@ -62,15 +103,7 @@ def start_generation(model, encryption, validity):
             print(Fore.YELLOW + message)
             input(Fore.GREEN + "Press ENTER to open image picker...")
 
-            file = filedialog.askopenfilename(
-                title=f"Select {label} Image",
-                filetypes=[
-                    ("Image Files", "*.png *.jpg *.jpeg *.heic *.heif"),
-                    ("PNG Files", "*.png"),
-                    ("JPEG Files", "*.jpg *.jpeg"),
-                    ("HEIC Files", "*.heic *.heif")
-                ]
-            )
+            file = pick_file("image/*")
 
             if not file:
                 print(Fore.RED + "Selection cancelled.")
@@ -86,16 +119,7 @@ def start_generation(model, encryption, validity):
         print(Fore.YELLOW + "Now select VIDEO file")
         input(Fore.GREEN + "Press ENTER to open video picker...")
 
-        file = filedialog.askopenfilename(
-            title="Select Video File",
-            filetypes=[
-                ("Video Files", "*.mp4 *.mov *.avi *.mkv"),
-                ("MP4 Files", "*.mp4"),
-                ("MOV Files", "*.mov"),
-                ("AVI Files", "*.avi"),
-                ("MKV Files", "*.mkv")
-            ]
-        )
+        file = pick_file("video/*")
 
         if not file:
             print(Fore.RED + "No video selected.")
