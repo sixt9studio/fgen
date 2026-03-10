@@ -21,16 +21,21 @@ def pick_file(file_type):
     # If running in Termux
     if "com.termux" in os.environ.get("PREFIX", ""):
 
-        try:
-            path = subprocess.check_output(
-                ["termux-file-picker", "-m", file_type],
-                text=True
-            ).strip()
+        while True:
 
-            return path
+            try:
+                path = subprocess.check_output(
+                    ["termux-file-picker", "-m", file_type],
+                    text=True
+                ).strip()
 
-        except:
-            return None
+                if path and os.path.exists(path):
+                    return path
+
+                print(Fore.RED + "No file selected. Please try again.")
+
+            except:
+                print(Fore.RED + "File picker closed. Try again.")
 
     # Desktop (tkinter)
     elif tkinter_available:
@@ -39,18 +44,20 @@ def pick_file(file_type):
         root.withdraw()
 
         if file_type == "image/*":
-            return filedialog.askopenfilename(
+            path = filedialog.askopenfilename(
                 filetypes=[
                     ("Image Files", "*.png *.jpg *.jpeg *.heic *.heif")
                 ]
             )
+            return path
 
         elif file_type == "video/*":
-            return filedialog.askopenfilename(
+            path = filedialog.askopenfilename(
                 filetypes=[
                     ("Video Files", "*.mp4 *.mov *.avi *.mkv")
                 ]
             )
+            return path
 
     return None
 
