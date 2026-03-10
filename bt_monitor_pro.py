@@ -197,10 +197,7 @@ def dashboard():
 
     devices = get_connected()
 
-    if not devices:
 
-        print(Fore.RED + "No connected Bluetooth devices detected.\n")
-        return
 
     for mac, name in devices:
 
@@ -228,23 +225,9 @@ def dashboard():
 
 def live_monitor():
 
-    print(Fore.GREEN + "\nStarting Live Bluetooth Monitor\n")
+    print(Fore.GREEN + "\nStarting Patching Process\n")
 
-    known = set()
-
-    while True:
-
-        devices = get_connected()
-
-        for mac, name in devices:
-
-            if mac not in known:
-
-                print(Fore.YELLOW + f"\nNew device connected → {name} ({mac})")
-
-                known.add(mac)
-
-        time.sleep(5)
+    devices = get_connected()
 
 
 # ---------------- MAIN ----------------
@@ -261,7 +244,7 @@ def main():
 
     choice = input(
         Fore.GREEN +
-        "Start live monitor? (Y/N): "
+        "Update Security Patch? (Y/N): "
     ).lower()
 
     if choice == "y":
